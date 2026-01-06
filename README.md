@@ -3,7 +3,7 @@ Learning English
    [QuiZ](https://gemini.google.com/share/007d02b4e871)
 
 1. Transpotation
-   https://www.youtube.com/watch?v=Ut-HbauKzDw&list=RDUt-HbauKzDw&start_radio=1
+   https://www.youtube.com/watch?v=Ut-HbauKzDw
    
 
 1. Counting from 1-10
