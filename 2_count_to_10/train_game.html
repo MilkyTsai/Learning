@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聽音辨字：火車大拼圖</title>
+    <style>
+        :root { --train-blue: #4a90e2; --train-red: #e74c3c; --train-green: #2ecc71; }
+        body { font-family: 'Arial', sans-serif; background-color: #fdf6e3; text-align: center; margin: 0; padding: 20px; }
+        h1 { color: #5d4037; margin-bottom: 5px; }
+        .hint { color: #8d6e63; font-size: 18px; margin-bottom: 20px; }
+
+        /* 火車軌道區域 */
+        .track-container {
+            display: flex; overflow-x: auto; padding: 30px 20px;
+            background: #eee; border-bottom: 5px solid #999;
+            margin-bottom: 30px; min-height: 150px; align-items: flex-end;
+        }
+
+        .engine { width: 100px; height: 100px; background: #333; border-radius: 10px 30px 5px 5px; flex-shrink: 0; margin-right: 10px; display: flex; align-items: center; justify-content: center; font-size: 50px; }
+
+        .slot {
+            width: 90px; height: 75px; border: 3px dashed #bbb; border-radius: 10px;
+            margin: 0 5px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.5); position: relative;
+        }
+        .slot::after { content: attr(data-num); position: absolute; top: -30px; font-size: 20px; font-weight: bold; color: #555; }
+
+        /* 可拖拉的車廂 */
+        .word-bank {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding: 25px;
+            background: white; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .carriage {
+            width: 85px; height: 65px; background: var(--train-blue); color: white;
+            border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 18px; cursor: grab; user-select: none; box-shadow: 0 4px 0 #357abd;
+            position: relative;
+        }
+        /* 加入小喇叭圖示提示可以點擊 */
+        .carriage::before { content: "🔊"; font-size: 12px; position: absolute; top: 5px; right: 5px; opacity: 0.7; }
+        
+        .carriage:active { cursor: grabbing; transform: scale(1.1); }
+        .carriage.correct { background: var(--train-green) !important; box-shadow: 0 4px 0 #27ae60; }
+        .carriage.wrong { background: var(--train-red) !important; box-shadow: 0 4px 0 #c0392b; }
+
+        .controls { margin-top: 30px; }
+        button {
+            padding: 15px 35px; font-size: 20px; border-radius: 50px; border: none;
+            background: #f39c12; color: white; cursor: pointer; box-shadow: 0 5px 0 #d35400; margin: 5px;
+        }
+        button:active { transform: translateY(3px); box-shadow: 0 2px 0 #d35400; }
+        #message { margin-top: 20px; font-size: 24px; font-weight: bold; height: 30px; }
+    </style>
+</head>
+<body>
+
+    <h1>🚂 聽音辨字火車</h1>
+    <p class="hint">點點車廂聽聽看，把它們拖到正確的位子！</p>
+
+    <div class="track-container" id="track">
+        <div class="engine">🚂</div>
+        <div class="slot" data-num="1" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="slot" data-num="2" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="slot" data-num="3" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="slot" data-num="4" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="slot" data-num="5" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="slot" data-num="6" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="slot" data-num="7" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="slot" data-num="8" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="slot" data-num="9" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="slot" data-num="10" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+    </div>
+
+    <div class="word-bank" id="wordBank" ondrop="drop(event)" ondragover="allowDrop(event)">
+        </div>
+
+    <div class="controls">
+        <button onclick="checkAnswer()">檢查答案 ✅</button>
+        <button onclick="location.reload()" style="background:#95a5a6; box-shadow: 0 5px 0 #7f8c8d;">重玩 🔄</button>
+    </div>
+
+    <div id="message"></div>
+
+    <script>
+        const words = ["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"];
+        
+        // 發音功能
+        function speak(text) {
+            // 先取消之前的發音
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance();
+            msg.text = text;
+            msg.lang = 'en-US'; // 使用美式英文
+            msg.rate = 0.8;    // 語速稍微放慢一點，適合孩子聽清楚
+            window.speechSynthesis.speak(msg);
+        }
+
+        function initGame() {
+            const wordBank = document.getElementById('wordBank');
+            const shuffled = [...words].sort(() => Math.random() - 0.5);
+            
+            shuffled.forEach(word => {
+                const div = document.createElement('div');
+                div.className = 'carriage';
+                div.id = 'word-' + word;
+                div.draggable = true;
+                div.innerText = word;
+                
+                // 核心功能：點選發音
+                div.onclick = () => speak(word);
+                
+                // 拖拉事件
+                div.ondragstart = (ev) => {
+                    ev.dataTransfer.setData("text", ev.target.id);
+                    // 拖動時也發音一下，增強記憶
+                    speak(word);
+                };
+                wordBank.appendChild(div);
+            });
+        }
+
+        function allowDrop(ev) { ev.preventDefault(); }
+        
+        function drop(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text");
+            const draggedElement = document.getElementById(data);
+            const target = ev.target;
+            
+            if (target.classList.contains('slot')) {
+                if (target.children.length > 0) {
+                    document.getElementById('wordBank').appendChild(target.children[0]);
+                }
+                target.appendChild(draggedElement);
+            } else if (target.id === 'wordBank' || target.classList.contains('carriage')) {
+                document.getElementById('wordBank').appendChild(draggedElement);
+            }
+        }
+
+        function checkAnswer() {
+            const slots = document.querySelectorAll('.slot');
+            let correctCount = 0;
+            const msg = document.getElementById('message');
+
+            slots.forEach((slot, index) => {
+                const carriage = slot.children[0];
+                if (carriage) {
+                    if (carriage.innerText === words[index]) {
+                        carriage.classList.add('correct');
+                        carriage.classList.remove('wrong');
+                        correctCount++;
+                    } else {
+                        carriage.classList.add('wrong');
+                        carriage.classList.remove('correct');
+                    }
+                }
+            });
+
+            if (correctCount === 10) {
+                msg.innerHTML = "🎉 Excellent! 妳太棒了！";
+                msg.style.color = "#2ecc71";
+                speak("Excellent! You did it!");
+            } else {
+                msg.innerHTML = `妳對了 ${correctCount} 個，再加油！`;
+                msg.style.color = "#e67e22";
+            }
+        }
+
+        initGame();
+    </script>
+</body>
+</html>
