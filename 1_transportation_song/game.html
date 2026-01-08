@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>交通工具連連看 - 精準連線版</title>
+    <style>
+        :root { 
+            --selected-color: #ffd32a; 
+            --correct-btn: #2ecc71;    
+            --line-color: #ef57ff;      
+            --bg-color: #f7f9fc; 
+        }
+
+        body { font-family: 'Arial Rounded MT Bold', sans-serif; background-color: var(--bg-color); text-align: center; margin: 0; padding: 20px; }
+        h1 { color: #3c40c6; font-size: 24px; margin-bottom: 5px; }
+        .hint { color: #57606f; font-size: 16px; margin-bottom: 20px; }
+
+        .game-container {
+            display: flex; 
+            justify-content: space-between; 
+            max-width: 700px; /* 加寬容器，讓左右距離變遠 */
+            margin: auto; 
+            background: white; 
+            padding: 40px; 
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+            position: relative; 
+            min-height: 480px;
+        }
+
+        .column { display: flex; flex-direction: column; gap: 20px; width: 30%; z-index: 2; }
+
+        .item {
+            padding: 10px; background-color: #3498db; color: white; border: none;
+            border-radius: 20px; cursor: pointer; transition: transform 0.2s, background 0.3s;
+            box-shadow: 0 6px #2980b9; display: flex; justify-content: center; 
+            align-items: center; height: 75px; position: relative;
+        }
+        
+        .item-img { background-color: #a29bfe; box-shadow: 0 6px #6c5ce7; }
+
+        .label-text { font-size: 22px; font-weight: bold; pointer-events: none; }
+        .vehicle-icon { font-size: 45px; pointer-events: none; }
+
+        .item.selected { background-color: var(--selected-color) !important; box-shadow: 0 6px #ffa801 !important; color: #2f3542; transform: scale(1.05); }
+        .item.matched { background-color: var(--correct-btn) !important; box-shadow: none !important; cursor: default; }
+        .item.wrong-shake { animation: shake 0.5s; background-color: #ff4757 !important; }
+
+        /* 連線畫布 */
+        #svg-lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+        .connection-line { 
+            stroke: var(--line-color); 
+            stroke-width: 8; 
+            stroke-linecap: round; 
+            opacity: 0.8; 
+            stroke-dasharray: 12, 6; 
+            animation: dash 15s linear infinite; 
+        }
+
+        @keyframes dash { from { stroke-dashoffset: 200; } to { stroke-dashoffset: 0; } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+        
+        .btn-bottom { margin-top: 30px; padding: 15px 40px; font-size: 20px; border-radius: 50px; border: none; background: #ffa502; color: white; cursor: pointer; box-shadow: 0 6px #e67e22; font-weight: bold; }
+		
+		#svg-lines {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			pointer-events: none;
+			z-index: 1;
+			overflow: visible; /* 關鍵：確保線條超出邊界時也能看到 */
+		}
+
+		.connection-line {
+			stroke: #ef57ff !important; /* 強制使用粉紫色 */
+			stroke-width: 8;
+			stroke-linecap: round;
+			opacity: 1; /* 先取消透明度，確保看得到 */
+		}
+		
+    </style>
+</head>
+<body>
+
+    <h1>Let's Match! 🚗✈️</h1>
+    <p class="hint">Listen and connect the dots!</p>
+
+    <div class="game-container">
+        <svg id="svg-lines"></svg>
+        <div class="column" id="word-col"></div>
+        <div class="column" id="img-col"></div>
+    </div>
+
+    <button class="btn-bottom" onclick="location.reload()">Play Again 🔄</button>
+
+    <script>
+        const transportData = [
+            { id: 'bike', word: "Bike", icon: "🚲" },
+            { id: 'bus', word: "Bus", icon: "🚌" },
+            { id: 'car', word: "Car", icon: "🚗" },
+            { id: 'train', word: "Train", icon: "🚂" },
+            { id: 'plane', word: "Plane", icon: "✈️" },
+            { id: 'rocket', word: "Rocket", icon: "🚀" }
+        ];
+
+        let selectedBtn = null;
+        let matchedCount = 0;
+        let synth = window.speechSynthesis;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playBeep(type) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            if (type === 'success') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+            } else if (type === 'fanfare') {
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.1);
+                    g.gain.setValueAtTime(0.1, audioCtx.currentTime + i * 0.1);
+                    o.start(audioCtx.currentTime + i * 0.1); o.stop(audioCtx.currentTime + i * 0.1 + 0.3);
+                });
+            }
+        }
+
+        function speak(text) {
+            if (synth.speaking) synth.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = 'en-US'; msg.rate = 0.9;
+            synth.speak(msg);
+        }
+
+        function init() {
+            const wordCol = document.getElementById('word-col');
+            const imgCol = document.getElementById('img-col');
+            const selection = [...transportData].sort(() => Math.random() - 0.5).slice(0, 5);
+            const words = [...selection].sort(() => Math.random() - 0.5);
+            const imgs = [...selection].sort(() => Math.random() - 0.5);
+
+            words.forEach(data => {
+                const btn = document.createElement('button');
+                btn.className = 'item';
+                btn.innerHTML = `<span class="label-text">${data.word}</span>`;
+                btn.dataset.id = data.id;
+                btn.onclick = () => {
+                    if (audioCtx.state === 'suspended') audioCtx.resume();
+                    speak(data.word);
+                    if (selectedBtn && selectedBtn.parentElement === wordCol) selectedBtn.classList.remove('selected');
+                    btn.classList.add('selected');
+                    selectedBtn = btn;
+                };
+                wordCol.appendChild(btn);
+            });
+
+            imgs.forEach(data => {
+                const btn = document.createElement('button');
+                btn.className = 'item item-img';
+                btn.innerHTML = `<span class="vehicle-icon">${data.icon}</span>`;
+                btn.dataset.id = data.id;
+                btn.onclick = () => {
+                    if (!selectedBtn || btn.classList.contains('matched')) return;
+                    if (selectedBtn.dataset.id === btn.dataset.id) {
+                        playBeep('success');
+                        selectedBtn.classList.add('matched');
+                        btn.classList.add('matched');
+                        drawLine(selectedBtn, btn);
+                        matchedCount++;
+                        selectedBtn = null;
+                        if (matchedCount === 5) {
+                            setTimeout(() => playBeep('fanfare'), 500);
+                            setTimeout(() => speak("Great job!"), 1200);
+                        }
+                    } else {
+                        playBeep('wrong');
+                        btn.classList.add('wrong-shake');
+                        selectedBtn.classList.add('wrong-shake');
+                        setTimeout(() => {
+                            btn.classList.remove('wrong-shake');
+                            selectedBtn.classList.remove('wrong-shake');
+                            selectedBtn.classList.remove('selected');
+                            selectedBtn = null;
+                        }, 500);
+                    }
+                };
+                imgCol.appendChild(btn);
+            });
+        }
+
+function drawLine(btn1, btn2) {
+    const svg = document.getElementById('svg-lines');
+    const container = document.querySelector('.game-container');
+    
+    if (!svg || !container) return;
+
+    const rect1 = btn1.getBoundingClientRect();
+    const rect2 = btn2.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+
+    const x1 = rect1.right - containerRect.left;
+    const y1 = rect1.top + (rect1.height / 2) - containerRect.top;
+    const x2 = rect2.left - containerRect.left;
+    const y2 = rect2.top + (rect2.height / 2) - containerRect.top;
+
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x1);
+    line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2);
+    line.setAttribute('y2', y2);
+    line.style.stroke = "#ef57ff"; // 直接用 JS 給顏色最保險
+    line.style.strokeWidth = "8";
+    line.setAttribute('class', 'connection-line');
+    
+    svg.appendChild(line);
+
+    // 強制瀏覽器重繪 SVG (這能解決 90% 線段不顯示的問題)
+    svg.innerHTML = svg.innerHTML; 
+}
+
+        init();
+    </script>
+</body>
+</html>

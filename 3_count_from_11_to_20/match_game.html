@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Counting 10-20 Game</title>
+    <style>
+        :root { --selected-color: #ffd32a; --correct-btn: #2ecc71; --line-color: #ef57ff; --bg-color: #f7f9fc; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Arial Rounded MT Bold', sans-serif; background-color: var(--bg-color); text-align: center; margin: 0; padding: 10px; }
+        h1 { color: #3c40c6; font-size: 22px; margin: 10px 0; }
+        .hint { color: #57606f; font-size: 14px; margin-bottom: 15px; }
+
+        .game-container {
+            display: flex; justify-content: space-between; width: 95%; max-width: 750px;
+            margin: auto; background: white; padding: 20px; border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: relative; min-height: 480px;
+        }
+
+        .column { display: flex; flex-direction: column; gap: 15px; width: 38%; z-index: 2; }
+
+        .item {
+            width: 100%; padding: 10px; background-color: #3498db; color: white; border: none;
+            border-radius: 15px; cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 5px #2980b9; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; height: 80px; position: relative;
+        }
+        
+        .item-num { background-color: #e67e22; box-shadow: 0 5px #d35400; }
+
+        .label-text { font-size: 20px; font-weight: bold; pointer-events: none; }
+        .quantity-icon { font-size: 13px; margin-top: 5px; opacity: 0; transition: opacity 0.5s; pointer-events: none; color: #fff; font-weight: normal; }
+
+        .item.selected { background-color: var(--selected-color) !important; box-shadow: 0 5px #ffa801 !important; color: #2f3542; transform: scale(1.05); }
+        .item.matched { background-color: var(--correct-btn) !important; box-shadow: none !important; cursor: default; }
+        .item.matched .quantity-icon { opacity: 1; }
+        .item.wrong-shake { animation: shake 0.5s; background-color: #ff4757 !important; }
+
+        #svg-lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: visible; }
+        .connection-line { stroke: var(--line-color); stroke-width: 8; stroke-linecap: round; opacity: 0.8; stroke-dasharray: 10, 5; }
+
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+        .btn-bottom { margin-top: 20px; padding: 12px 30px; font-size: 18px; border-radius: 50px; border: none; background: #ffa502; color: white; cursor: pointer; box-shadow: 0 5px #e67e22; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Counting 10 to 20! 💎🍎</h1>
+    <p class="hint">10 and more... Let's match the numbers!</p>
+
+    <div class="game-container" id="main-game">
+        <svg id="svg-lines"></svg>
+        <div class="column" id="word-col"></div>
+        <div class="column" id="num-col"></div>
+    </div>
+
+    <button class="btn-bottom" onclick="location.reload()">New Quiz 🔄</button>
+
+    <script>
+        // 題目池：包含 11-20
+        const fullPairsData = [
+            { id: 11, word: "Eleven", num: "11", icon: "💎(10)+🍎" },
+            { id: 12, word: "Twelve", num: "12", icon: "💎(10)+🍎🍎" },
+            { id: 13, word: "Thirteen", num: "13", icon: "💎(10)+🍎🍎🍎" },
+            { id: 14, word: "Fourteen", num: "14", icon: "💎(10)+🍀🍀🍀🍀" },
+            { id: 15, word: "Fifteen", num: "15", icon: "💎(10)+🖐️" },
+            { id: 16, word: "Sixteen", num: "16", icon: "💎(10)+🍭🍭🍭🍭🍭🍭" },
+            { id: 17, word: "Seventeen", num: "17", icon: "💎(10)+🐱🐱🐱" },
+            { id: 18, word: "Eighteen", num: "18", icon: "💎(10)+🎈🎈🎈" },
+            { id: 19, word: "Nineteen", num: "19", icon: "💎(10)+🍄🍄🍄" },
+            { id: 20, word: "Twenty", num: "20", icon: "💎(10)+💎(10)" }
+        ];
+
+        let selectedBtn = null;
+        let matchedCount = 0;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playBeep(type) {
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            if (type === 'success') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+            } else if (type === 'fanfare') {
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.1);
+                    g.gain.setValueAtTime(0.1, audioCtx.currentTime + i * 0.1);
+                    o.start(audioCtx.currentTime + i * 0.1); o.stop(audioCtx.currentTime + i * 0.1 + 0.3);
+                });
+            }
+        }
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = 'en-US'; msg.rate = 0.85;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function init() {
+            const wordCol = document.getElementById('word-col');
+            const numCol = document.getElementById('num-col');
+            
+            // 隨機選 5 個題目
+            const selection = [...fullPairsData].sort(() => Math.random() - 0.5).slice(0, 5);
+            const words = [...selection].sort(() => Math.random() - 0.5);
+            const nums = [...selection].sort(() => Math.random() - 0.5);
+
+            words.forEach(data => {
+                const btn = document.createElement('button');
+                btn.className = 'item';
+                btn.innerHTML = `<span class="label-text">${data.word}</span>`;
+                btn.dataset.id = data.id;
+                btn.onclick = () => {
+                    initAudio(); speak(data.word);
+                    if (selectedBtn && selectedBtn.parentElement === wordCol) selectedBtn.classList.remove('selected');
+                    btn.classList.add('selected');
+                    selectedBtn = btn;
+                };
+                wordCol.appendChild(btn);
+            });
+
+            nums.forEach(data => {
+                const btn = document.createElement('button');
+                btn.className = 'item item-num';
+                btn.innerHTML = `<span class="label-text">${data.num}</span><span class="quantity-icon">${data.icon}</span>`;
+                btn.dataset.id = data.id;
+                btn.onclick = () => {
+                    if (!selectedBtn || btn.classList.contains('matched')) return;
+                    initAudio();
+                    if (selectedBtn.dataset.id === btn.dataset.id) {
+                        playBeep('success');
+                        selectedBtn.classList.add('matched');
+                        btn.classList.add('matched');
+                        drawLine(selectedBtn, btn);
+                        matchedCount++;
+                        selectedBtn = null;
+                        if (matchedCount === 5) {
+                            setTimeout(() => {
+                                playBeep('fanfare');
+                                document.getElementById('main-game').style.backgroundColor = "#e8f8f5";
+                            }, 500);
+                            setTimeout(() => speak("Great job! Ten to twenty!"), 1200);
+                        }
+                    } else {
+                        playBeep('wrong');
+                        btn.classList.add('wrong-shake');
+                        selectedBtn.classList.add('wrong-shake');
+                        setTimeout(() => {
+                            btn.classList.remove('wrong-shake');
+                            selectedBtn.classList.remove('wrong-shake');
+                            selectedBtn.classList.remove('selected');
+                            selectedBtn = null;
+                        }, 500);
+                    }
+                };
+                numCol.appendChild(btn);
+            });
+        }
+
+        function drawLine(btn1, btn2) {
+            const svg = document.getElementById('svg-lines');
+            const container = document.getElementById('main-game');
+            const rect1 = btn1.getBoundingClientRect();
+            const rect2 = btn2.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+
+            const x1 = rect1.right - containerRect.left;
+            const y1 = rect1.top + (rect1.height / 2) - containerRect.top;
+            const x2 = rect2.left - containerRect.left;
+            const y2 = rect2.top + (rect2.height / 2) - containerRect.top;
+
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+            line.setAttribute('class', 'connection-line');
+            svg.appendChild(line);
+            svg.innerHTML = svg.innerHTML; // 強制重繪
+        }
+
+        init();
+    </script>
+</body>
+</html>
