@@ -21,3 +21,8 @@ https://www.youtube.com/watch?v=By2hmo323xM&t=300s
    https://www.youtube.com/watch?v=wiGEEJLLKd8
 
    [Game](https://milkytsai.github.io/Learning/3_count_from_11_to_20/train_game.html)
+   
+   
+   
+   
+https://www.youtube.com/playlist?list=PLt7Se3SAnZY7l09Oc51Lau2SFsqfDkEuM

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Counting Quiz with Images</title>
+    <style>
+        :root { --primary: #6c5ce7; --success: #2ecc71; --bg: #f7f9fc; }
+        body { font-family: 'Arial Rounded MT Bold', sans-serif; background: var(--bg); text-align: center; padding: 20px; }
+        .quiz-container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        
+        /* 插圖樣式 */
+        .q-image { 
+            width: 100%; 
+            max-width: 250px; 
+            height: 180px; 
+            object-fit: contain; 
+            margin: 10px auto 20px; 
+            display: block;
+            border-radius: 15px;
+            background: #f9f9f9;
+        }
+
+        .question-box { font-size: 22px; color: #2d3436; margin-bottom: 15px; line-height: 1.4; font-weight: bold; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .option-btn { 
+            padding: 20px; font-size: 18px; border: none; border-radius: 20px; 
+            background: #dfe6e9; cursor: pointer; transition: 0.2s; 
+            box-shadow: 0 5px #b2bec3; font-weight: bold; color: #2d3436;
+        }
+        .option-btn.correct { background: var(--success) !important; color: white; box-shadow: 0 5px #27ae60; }
+        .option-btn.wrong { background: #ff7675 !important; color: white; box-shadow: 0 5px #d63031; }
+        #next-btn, #start-btn { 
+            margin-top: 25px; padding: 15px 45px; font-size: 20px; border-radius: 50px; 
+            border: none; background: var(--primary); color: white; cursor: pointer; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Song Quiz! 🎶</h1>
+    
+    <div class="quiz-container" id="quiz-body">
+        <div id="start-screen">
+            <h2 style="color: #6c5ce7;">Ready to play?</h2>
+            <button id="start-btn" onclick="startQuiz()">Start Game! ▶️</button>
+        </div>
+
+        <div id="game-content" style="display:none;">
+            <div id="current-q-label">Question: <span id="current-q">1</span> / 5</div>
+            <div class="question-box" id="question"></div>
+            
+            <img id="question-img" class="q-image" src="" alt="Illustration">
+            
+            <div class="options-grid" id="options"></div>
+            <button id="next-btn" onclick="loadNextQuestion()">Next Question ➡️</button>
+        </div>
+    </div>
+
+    <script>
+        // 在這邊加入圖片網址
+        const questions = [
+            {
+                q: "In the song, what comes after:<br>Ten, Eleven, ...?",
+                img: "img/12.png", // 可以換成妳想要的圖片連結
+                options: ["Twelve", "Twenty", "Thirteen", "Nine"],
+                answer: "Twelve"
+            },
+            {
+                q: "What is the FIRST action in the UFO part?",
+                img: "https://img.icons8.com/color/200/dancing.png",
+                options: ["Shake your hips", "Swing your arms", "Stomp your feet", "Clap with me"],
+                answer: "Swing your arms"
+            },
+            {
+                q: "Which number is 'One-Five'?",
+                img: "https://img.icons8.com/color/200/number-15.png",
+                options: ["Fifty", "Five", "Fifteen", "Fifty-one"],
+                answer: "Fifteen"
+            },
+            {
+                q: "What do you do with your FEET?",
+                img: "https://img.icons8.com/color/200/sneakers.png",
+                options: ["Shake", "Swing", "Clap", "Stomp"],
+                answer: "Stomp"
+            },
+            {
+                q: "What is the very LAST number in the song?",
+                img: "https://img.icons8.com/color/200/finish-flag.png",
+                options: ["Ten", "Eleven", "Twenty", "Nineteen"],
+                answer: "Twenty"
+            }
+        ];
+
+        let currentIdx = 0;
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = 'en-US';
+            window.speechSynthesis.speak(msg);
+        }
+
+        function startQuiz() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-content').style.display = 'block';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const data = questions[currentIdx];
+            
+            // 1. 更新文字題目
+            document.getElementById('question').innerHTML = data.q;
+            document.getElementById('current-q').innerText = currentIdx + 1;
+            
+            // 2. 更新圖片 (重點在此)
+            const imgTag = document.getElementById('question-img');
+            imgTag.src = data.img; 
+
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            document.getElementById('next-btn').style.display = 'none';
+
+            data.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(btn, opt);
+                optionsDiv.appendChild(btn);
+            });
+
+            speak(data.q.replace('<br>', ' '));
+        }
+
+        function checkAnswer(btn, choice) {
+            const correct = questions[currentIdx].answer;
+            const allBtns = document.querySelectorAll('.option-btn');
+            allBtns.forEach(b => b.style.pointerEvents = 'none');
+
+            if (choice === correct) {
+                btn.classList.add('correct');
+                speak("Yes! It is " + correct);
+            } else {
+                btn.classList.add('wrong');
+                speak("No, it's " + correct);
+                allBtns.forEach(b => {
+                    if (b.innerText === correct) b.classList.add('correct');
+                });
+            }
+            document.getElementById('next-btn').style.display = 'inline-block';
+        }
+
+        function loadNextQuestion() {
+            currentIdx++;
+            if (currentIdx < questions.length) {
+                loadQuestion();
+            } else {
+                document.getElementById('quiz-body').innerHTML = `
+                    <h2>🌟 All Done! 🌟</h2>
+                    <button onclick="location.reload()" style="padding:15px 30px; border-radius:50px; background:#6c5ce7; color:white; cursor:pointer;">Play Again</button>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
