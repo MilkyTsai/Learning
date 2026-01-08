@@ -1,10 +1,18 @@
 # Learning
 Learning English
 
-2. Count To 10   [Count To 10](https://milkytsai.github.io/Learning/2_count_to_10/)
+1. Transpotation
+   https://www.youtube.com/watch?v=Ut-HbauKzDw
+      
+   [QuiZ](https://gemini.google.com/share/007d02b4e871)
    
-  [Quiz](https://milkytsai.github.io/Learning/2_count_to_10/index.html)
+
+1. Counting from 1-10
+   https://www.youtube.com/watch?v=DR-cfDsHCGA
+
+   [Quiz](https://milkytsai.github.io/Learning/2_count_to_10/index.html)
+   [Game](https://milkytsai.github.io/Learning/2_count_to_10/train_game.html)
   
-  [Game](https://milkytsai.github.io/Learning/2_count_to_10/train_game.html)
   
-   
+3. Counting from 10-20 
+   https://www.youtube.com/watch?v=wiGEEJLLKd8
