@@ -26,6 +26,8 @@ https://www.youtube.com/watch?v=By2hmo323xM&t=300s
    [Dot to Dot](https://milkytsai.github.io/Learning/3_count_from_11_to_20/dot_to_tod.html)
    
    
-   
+https://www.youtube.com/watch?v=GpO8_FMWcHA&list=PLt7Se3SAnZY7l09Oc51Lau2SFsqfDkEuM&index=10   
+
+https://www.youtube.com/watch?v=eTCcqQxT5Gk&list=PLt7Se3SAnZY7l09Oc51Lau2SFsqfDkEuM&index=7
    
 https://www.youtube.com/playlist?list=PLt7Se3SAnZY7l09Oc51Lau2SFsqfDkEuM
