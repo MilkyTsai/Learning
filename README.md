@@ -20,6 +20,7 @@ https://www.youtube.com/watch?v=By2hmo323xM&t=300s
 3. Counting from 10-20 
    https://www.youtube.com/watch?v=wiGEEJLLKd8
 
+   [Quiz](https://milkytsai.github.io/Learning/3_count_from_11_to_20/quiz.html)
    [Game](https://milkytsai.github.io/Learning/3_count_from_11_to_20/train_game.html)
    
    
