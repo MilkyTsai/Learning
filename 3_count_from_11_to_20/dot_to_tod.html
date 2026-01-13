@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>可愛貓咪拖曳連線遊戲-修正版</title>
+    <style>
+        body { font-family: "Microsoft JhengHei", Arial, sans-serif; background-color: #fcf8f3; text-align: center; margin: 0; padding: 20px; }
+        h1 { color: #e76f51; }
+        .game-container {
+            width: 1400px; height: 750px; 
+            margin: 10px auto; background: white; 
+            border: 8px solid #f4a261; border-radius: 35px; position: relative; overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        }
+        svg { width: 100%; height: 100%; display: block; user-select: none; }
+        .dot { fill: #2a9d8f; stroke: white; stroke-width: 3; cursor: grab; }
+        .dot:hover { fill: #264653; r: 18; }
+        .dot.current-start { fill: #e9c46a; r: 18; cursor: grabbing; }
+        .dot.done { fill: #f4a261; r: 10; }
+        .num-text { font-size: 22px; font-weight: bold; fill: #264653; pointer-events: none; }
+        .line-segment { stroke: #e76f51; stroke-width: 10; stroke-linecap: round; fill: none; }
+        .temp-line { stroke: #264653; stroke-width: 4; stroke-dasharray: 8; fill: none; opacity: 0.5; pointer-events: none; }
+        #start-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.95); z-index: 100;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .btn-big { padding: 25px 80px; font-size: 30px; background: #e76f51; color: white; border: none; border-radius: 60px; cursor: pointer; box-shadow: 0 8px #d1495b; }
+        #cat-final { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 180px; display: none; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <h1>🐾 可愛貓咪連連看 (點位修正版) 🐾</h1>
+    <p>點擊數字聽發音，從黃色點「拖曳」到下一個數字來連線！</p>
+
+    <div class="game-container" id="gameArea">
+        <div id="start-overlay">
+            <button class="btn-big" onclick="startGame()">點我開始遊戲 ➔</button>
+        </div>
+        
+        <div id="cat-final">😻</div> 
+        <svg id="gameSvg" viewBox="0 0 1400 750">
+            <g id="lineLayer"></g>
+            <line id="dragLine" class="temp-line" x1="0" y1="0" x2="0" y2="0" style="display:none;"/>
+        </svg>
+    </div>
+
+    <button class="btn-big" style="margin-top:20px; font-size:20px; padding:10px 40px; background:#2a9d8f; box-shadow: 0 4px #264653;" onclick="window.location.reload()">重新挑戰 🔄</button>
+
+    <script>
+        const words = ["one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen","twenty"];
+        
+        // --- 重新排列座標：確保 one 與 fifteen 距離非常遠 ---
+        const pts = [
+            {x:450, y:650}, // 1. one (左腳前)
+            {x:300, y:600}, // 2. two (左腳後)
+            {x:200, y:500}, // 3. three (左側臀部)
+            {x:180, y:350}, // 4. four (左側背部)
+            {x:250, y:200}, // 5. five (左耳根)
+            {x:350, y:80},  // 6. six (左耳尖)
+            {x:550, y:150}, // 7. seven (額頭左)
+            {x:700, y:130}, // 8. eight (額頭中)
+            {x:850, y:150}, // 9. nine (額頭右)
+            {x:1050, y:80}, // 10. ten (右耳尖)
+            {x:1150, y:200},// 11. eleven (右耳根)
+            {x:1220, y:350},// 12. twelve (右側背部)
+            {x:1200, y:500},// 13. thirteen (右側臀部)
+            {x:1050, y:600},// 14. fourteen (右腳後)
+            {x:900, y:650}, // 15. fifteen (右腳前) -- 距離 one 450像素，絕不重疊
+            {x:950, y:450}, // 16. sixteen (尾巴根部)
+            {x:1150, y:550},// 17. seventeen (尾巴中段)
+            {x:1300, y:500},// 18. eighteen (尾巴尖端)
+            {x:1250, y:400},// 19. nineteen (尾巴上方)
+            {x:1100, y:430} // 20. twenty (尾巴收尾)
+        ];
+
+        let currentIdx = 0;
+        let isDragging = false;
+        let startPos = {x:0, y:0};
+
+        const svg = document.getElementById('gameSvg');
+        const lineLayer = document.getElementById('lineLayer');
+        const dragLine = document.getElementById('dragLine');
+
+        function playSound(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'en-US';
+                u.rate = 0.8;
+                window.speechSynthesis.speak(u);
+            }
+        }
+
+        function startGame() {
+            document.getElementById('start-overlay').style.display = 'none';
+            playSound("Let's go!"); 
+            init();
+        }
+
+        function init() {
+            pts.forEach((p, i) => {
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                c.setAttribute("cx", p.x); c.setAttribute("cy", p.y); c.setAttribute("r", 15);
+                c.setAttribute("id", "dot" + i);
+                c.setAttribute("class", "dot");
+                
+                // 按下開始拖曳
+                c.onmousedown = (e) => startDrag(i, e);
+                // 點擊發音
+                c.onclick = () => playSound(words[i]);
+
+                const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                t.setAttribute("x", p.x); t.setAttribute("y", p.y - 35);
+                t.setAttribute("text-anchor", "middle"); t.setAttribute("class", "num-text");
+                t.textContent = words[i];
+
+                g.appendChild(c); g.appendChild(t); svg.appendChild(g);
+            });
+            updateCurrentTarget();
+        }
+
+        function updateCurrentTarget() {
+            // 移除舊的標記，設定新的黃色起點
+            document.querySelectorAll('.dot').forEach(d => d.classList.remove('current-start'));
+            if(currentIdx < pts.length) {
+                document.getElementById("dot" + currentIdx).classList.add("current-start");
+            }
+        }
+
+        function startDrag(i, e) {
+            if (i !== currentIdx) {
+                playSound(words[i]); // 點錯也發音
+                return;
+            }
+            isDragging = true;
+            startPos = pts[i];
+            dragLine.setAttribute("x1", startPos.x);
+            dragLine.setAttribute("y1", startPos.y);
+            dragLine.style.display = "block";
+            
+            window.addEventListener('mousemove', onDrag);
+            window.addEventListener('mouseup', endDrag);
+        }
+
+        function onDrag(e) {
+            if (!isDragging) return;
+            const pt = svg.createSVGPoint();
+            pt.x = e.clientX; pt.y = e.clientY;
+            const loc = pt.matrixTransform(svg.getScreenCTM().inverse());
+            dragLine.setAttribute("x2", loc.x);
+            dragLine.setAttribute("y2", loc.y);
+        }
+
+        function endDrag(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            dragLine.style.display = "none";
+            
+            window.removeEventListener('mousemove', onDrag);
+            window.removeEventListener('mouseup', endDrag);
+
+            // 檢查放開的位置是否在下一個正確的點附近
+            const pt = svg.createSVGPoint();
+            pt.x = e.clientX; pt.y = e.clientY;
+            const loc = pt.matrixTransform(svg.getScreenCTM().inverse());
+            
+            const nextIdx = currentIdx + 1;
+            if (nextIdx < pts.length) {
+                const dist = Math.sqrt(Math.pow(loc.x - pts[nextIdx].x, 2) + Math.pow(loc.y - pts[nextIdx].y, 2));
+                if (dist < 40) { // 判定範圍
+                    // 連線成功
+                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    line.setAttribute("x1", pts[currentIdx].x);
+                    line.setAttribute("y1", pts[currentIdx].y);
+                    line.setAttribute("x2", pts[nextIdx].x);
+                    line.setAttribute("y2", pts[nextIdx].y);
+                    line.setAttribute("class", "line-segment");
+                    lineLayer.appendChild(line);
+                    
+                    document.getElementById("dot" + currentIdx).classList.add("done");
+                    playSound(words[nextIdx]);
+                    currentIdx++;
+                    updateCurrentTarget();
+                    
+                    if (currentIdx === pts.length - 1) {
+                        document.getElementById("cat-final").style.display = "block";
+                        playSound("Wonderful! A cute cat!");
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
