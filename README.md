@@ -11,8 +11,9 @@ Learning English
    https://www.youtube.com/watch?v=DR-cfDsHCGA
 
    [Quiz](https://milkytsai.github.io/Learning/2_count_to_10/quiz.html)
-   [Game](https://milkytsai.github.io/Learning/2_count_to_10/train_game.html)
-
+   [Train Game](https://milkytsai.github.io/Learning/2_count_to_10/train_game.html)
+   [Match Game](https://milkytsai.github.io/Learning/2_count_to_10/match_game.html)
+   
 
 Numbers 1-20 Lesson for Children
 https://www.youtube.com/watch?v=By2hmo323xM&t=300s  
@@ -21,7 +22,8 @@ https://www.youtube.com/watch?v=By2hmo323xM&t=300s
    https://www.youtube.com/watch?v=wiGEEJLLKd8
 
    [Quiz](https://milkytsai.github.io/Learning/3_count_from_11_to_20/quiz.html)
-   [Game](https://milkytsai.github.io/Learning/3_count_from_11_to_20/train_game.html)
+   [Match Game](https://milkytsai.github.io/Learning/3_count_from_11_to_20/match_game.html)
+   [Dot to Dot](https://milkytsai.github.io/Learning/3_count_from_11_to_20/dot_to_tod.html)
    
    
    
