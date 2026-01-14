@@ -34,6 +34,8 @@ https://www.youtube.com/watch?v=Aq4UAss33qA&list=RDAq4UAss33qA&start_radio=1 1-2
 https://www.youtube.com/watch?v=ieeBFEJwxRw&list=RDieeBFEJwxRw&start_radio=1 Bluey  1-100
 
 https://www.youtube.com/watch?v=gghDRJVxFxU Hello 
+   [QuiZ](https://gemini.google.com/share/771f7a697ed8)
+
 
 https://www.youtube.com/watch?v=5NJ_H4dEYMI 刷牙
 
