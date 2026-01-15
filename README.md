@@ -23,12 +23,13 @@ https://www.youtube.com/watch?v=By2hmo323xM&t=300s
 
    [Match Game](https://milkytsai.github.io/Learning/3_count_from_11_to_20/match_game.html)
    [Quiz](https://milkytsai.github.io/Learning/3_count_from_11_to_20/quiz.html)
-   [Dot to Dot](https://milkytsai.github.io/Learning/3_count_from_11_to_20/dot_to_tod.html)
+   [Dot to Dot](https://milkytsai.github.io/Learning/3_count_from_11_to_20/dot_to_dot.html)
 
 4. Hello Song
    https://www.youtube.com/watch?v=gghDRJVxFxU
    
-   [QuiZ](https://gemini.google.com/share/771f7a697ed8)
+   [Match Game](https://milkytsai.github.io/Learning/4_hello_song/match_game.html)
+   [QuiZ](https://gemini.google.com/share/74a40f1acb7d)
    
 https://www.youtube.com/watch?v=GpO8_FMWcHA&list=PLt7Se3SAnZY7l09Oc51Lau2SFsqfDkEuM&index=10 Halloween Song for Kids    
 
