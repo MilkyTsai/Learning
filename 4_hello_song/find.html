@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>Hello Song 森林找單字</title>
+    <style>
+        :root { --forest-green: #27ae60; --sky-blue: #87ceeb; }
+        body { font-family: 'Arial Rounded MT Bold', sans-serif; background-color: #f0f9ff; text-align: center; margin: 0; overflow: hidden; }
+        
+        .game-header { padding: 10px; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: var(--forest-green); margin: 5px 0; font-size: 24px; }
+        
+        #game-canvas {
+            position: relative; width: 800px; height: 500px; 
+            margin: 20px auto; background: linear-gradient(to bottom, #87ceeb 0%, #87ceeb 50%, #7cfc00 50%, #228b22 100%);
+            border: 10px solid #8b4513; border-radius: 20px; overflow: hidden;
+            cursor: url('https://cur.cursors-4u.net/navigation/nav-1/nav1.cur'), auto;
+        }
+
+        /* 隱藏的單字樣式 */
+        .hidden-word {
+            position: absolute; padding: 5px 10px; background: rgba(255,255,255,0.2);
+            border-radius: 10px; cursor: pointer; color: transparent;
+            font-size: 20px; transition: all 0.3s; user-select: none;
+        }
+        .hidden-word:hover { background: rgba(255,255,255,0.5); transform: scale(1.1); }
+        .hidden-word.found { color: #fff !important; background: #ff7f50 !important; box-shadow: 0 0 15px #fff; pointer-events: none; }
+
+        /* 裝飾物 */
+        .tree { position: absolute; font-size: 60px; pointer-events: none; }
+        .cloud { position: absolute; font-size: 40px; opacity: 0.8; animation: moveCloud 20s linear infinite; }
+        @keyframes moveCloud { from { left: -100px; } to { left: 900px; } }
+
+        #word-list { display: flex; justify-content: center; gap: 20px; margin-top: 10px; }
+        .target-word { padding: 10px 20px; background: white; border: 2px solid #ddd; border-radius: 15px; color: #ccc; }
+        .target-word.collected { background: #ff7f50; color: white; border-color: #ff7f50; }
+    </style>
+</head>
+<body>
+
+    <div class="game-header">
+        <h1>🌲 森林找單字 🔍</h1>
+        <p>躲起來了！找出歌詞裡的 5 個單字：</p>
+    </div>
+
+    <div id="game-canvas">
+        <div class="cloud" style="top: 20px; animation-delay: 0s;">☁️</div>
+        <div class="cloud" style="top: 80px; animation-delay: -10s;">☁️</div>
+
+        <div class="tree" style="bottom: 50px; left: 50px;">🌳</div>
+        <div class="tree" style="bottom: 150px; right: 80px;">🌲</div>
+        <div class="tree" style="bottom: 30px; left: 350px;">🌳</div>
+
+        <div class="hidden-word" id="word-hello" style="top: 40px; left: 450px;">Hello</div>
+        <div class="hidden-word" id="word-school" style="bottom: 100px; left: 120px;">school</div>
+        <div class="hidden-word" id="word-friends" style="bottom: 60px; right: 200px;">friends</div>
+        <div class="hidden-word" id="word-play" style="top: 280px; left: 400px;">play</div>
+        <div class="hidden-word" id="word-name" style="top: 150px; left: 100px;">name</div>
+    </div>
+
+    <div id="word-list">
+        <div class="target-word" id="list-hello">Hello</div>
+        <div class="target-word" id="list-school">school</div>
+        <div class="target-word" id="list-friends">friends</div>
+        <div class="target-word" id="list-play">play</div>
+        <div class="target-word" id="list-name">name</div>
+    </div>
+
+    <script>
+        const words = ['hello', 'school', 'friends', 'play', 'name'];
+        let foundCount = 0;
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = 'en-US';
+            window.speechSynthesis.speak(msg);
+        }
+
+        // 幫每個單字加上點擊事件
+        words.forEach(id => {
+            const el = document.getElementById('word-' + id);
+            el.onclick = () => {
+                if (!el.classList.contains('found')) {
+                    el.classList.add('found');
+                    document.getElementById('list-' + id).classList.add('collected');
+                    speak(id);
+                    foundCount++;
+                    if (foundCount === words.length) {
+                        setTimeout(() => {
+                            speak("Congratulations! You found all the words!");
+                            alert("🌟 太棒了！你找齊了所有森林單字！");
+                        }, 500);
+                    }
+                }
+            };
+        });
+    </script>
+</body>
+</html>
