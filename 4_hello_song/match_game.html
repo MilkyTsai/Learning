@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Counting 10-20 Game</title>
+    <title>Hello Song Match Game</title>
     <style>
         :root { --selected-color: #ffd32a; --correct-btn: #2ecc71; --line-color: #ef57ff; --bg-color: #f7f9fc; }
         * { box-sizing: border-box; }
@@ -29,7 +29,7 @@
         .item-num { background-color: #e67e22; box-shadow: 0 5px #d35400; }
 
         .label-text { font-size: 20px; font-weight: bold; pointer-events: none; }
-        .quantity-icon { font-size: 13px; margin-top: 5px; opacity: 0; transition: opacity 0.5s; pointer-events: none; color: #fff; font-weight: normal; }
+        .quantity-icon { font-size: 50px; margin-top: 5px; opacity: 0; transition: opacity 0.5s; pointer-events: none; color: #fff; font-weight: normal; }
 
         .item.selected { background-color: var(--selected-color) !important; box-shadow: 0 5px #ffa801 !important; color: #2f3542; transform: scale(1.05); }
         .item.matched { background-color: var(--correct-btn) !important; box-shadow: none !important; cursor: default; }
@@ -45,8 +45,8 @@
 </head>
 <body>
 
-    <h1>Counting 10 to 20! 💎🍎</h1>
-    <p class="hint">10 and more... Let's match the numbers!</p>
+    <h1>Hello Song 💎🍎</h1>
+    <p class="hint">Hello~  Let's match the Word!</p>
 
     <div class="game-container" id="main-game">
         <svg id="svg-lines"></svg>
