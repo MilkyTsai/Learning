@@ -5,31 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hello Song Match Game</title>
     <style>
-        :root { --selected-color: #ffd32a; --correct-btn: #2ecc71; --line-color: #ef57ff; --bg-color: #f7f9fc; }
+        :root { --selected-color: #ffd32a; --correct-btn: #2ecc71; --line-color: #ef57ff; --bg-color: #fcf8f3; }
         * { box-sizing: border-box; }
-        body { font-family: 'Arial Rounded MT Bold', sans-serif; background-color: var(--bg-color); text-align: center; margin: 0; padding: 10px; }
-        h1 { color: #3c40c6; font-size: 22px; margin: 10px 0; }
-        .hint { color: #57606f; font-size: 14px; margin-bottom: 15px; }
+        body { font-family: 'Arial Rounded MT Bold', 'Microsoft JhengHei', sans-serif; background-color: var(--bg-color); text-align: center; margin: 0; padding: 10px; }
+        h1 { color: #e76f51; font-size: 26px; margin: 15px 0 5px 0; }
+        .hint { color: #8d8d8d; font-size: 16px; margin-bottom: 20px; }
 
         .game-container {
-            display: flex; justify-content: space-between; width: 95%; max-width: 750px;
-            margin: auto; background: white; padding: 20px; border-radius: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: relative; min-height: 480px;
+            display: flex; justify-content: space-between; width: 98%; max-width: 850px;
+            margin: auto; background: white; padding: 25px; border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); position: relative; min-height: 520px;
         }
 
-        .column { display: flex; flex-direction: column; gap: 15px; width: 38%; z-index: 2; }
+        .column { display: flex; flex-direction: column; gap: 15px; width: 42%; z-index: 2; }
 
         .item {
-            width: 100%; padding: 10px; background-color: #3498db; color: white; border: none;
-            border-radius: 15px; cursor: pointer; transition: all 0.2s;
-            box-shadow: 0 5px #2980b9; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; height: 80px; position: relative;
+            width: 100%; padding: 12px; background-color: #3498db; color: white; border: none;
+            border-radius: 18px; cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 5px #2980b9; display: flex; 
+            justify-content: center; align-items: center; height: 75px; position: relative;
         }
         
-        .item-num { background-color: #e67e22; box-shadow: 0 5px #d35400; }
+        /* 答案按鈕：橫向排列 (Row) */
+        .item-anwser { 
+            background-color: #e67e22; 
+            box-shadow: 0 5px #d35400; 
+            flex-direction: row; /* 強制橫向排隊 */
+            justify-content: space-between; /* 文字靠左，Icon 靠右 */
+            padding: 0 20px;
+        }
 
-        .label-text { font-size: 20px; font-weight: bold; pointer-events: none; }
-        .quantity-icon { font-size: 50px; margin-top: 5px; opacity: 0; transition: opacity 0.5s; pointer-events: none; color: #fff; font-weight: normal; }
+        .label-text { font-size: 22px; font-weight: bold; pointer-events: none; }
+        
+        /* Icon 樣式優化 */
+        .quantity-icon { 
+            font-size: 32px; /* 稍微縮小一點以利並排 */
+            opacity: 0; 
+            transition: opacity 0.5s; 
+            pointer-events: none; 
+            margin-left: 10px;
+        }
 
         .item.selected { background-color: var(--selected-color) !important; box-shadow: 0 5px #ffa801 !important; color: #2f3542; transform: scale(1.05); }
         .item.matched { background-color: var(--correct-btn) !important; box-shadow: none !important; cursor: default; }
@@ -40,35 +55,35 @@
         .connection-line { stroke: var(--line-color); stroke-width: 8; stroke-linecap: round; opacity: 0.8; stroke-dasharray: 10, 5; }
 
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
-        .btn-bottom { margin-top: 20px; padding: 12px 30px; font-size: 18px; border-radius: 50px; border: none; background: #ffa502; color: white; cursor: pointer; box-shadow: 0 5px #e67e22; font-weight: bold; }
+        .btn-bottom { margin-top: 25px; padding: 15px 40px; font-size: 20px; border-radius: 50px; border: none; background: #2a9d8f; color: white; cursor: pointer; box-shadow: 0 5px #21867a; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <h1>Hello Song 💎🍎</h1>
-    <p class="hint">Hello~  Let's match the Word!</p>
+    <h1>Let's Match the Words! 🐾</h1>
+    <p class="hint">Hello Song Vocabulary Fun</p>
 
     <div class="game-container" id="main-game">
         <svg id="svg-lines"></svg>
         <div class="column" id="word-col"></div>
-        <div class="column" id="num-col"></div>
+        <div class="column" id="anwser-col"></div>
     </div>
 
-    <button class="btn-bottom" onclick="location.reload()">New Quiz 🔄</button>
+    <button class="btn-bottom" onclick="location.reload()">Next Game 🔄</button>
 
     <script>
-        // 題目池：包含 11-20
         const fullPairsData = [
-            { id: 11, word: "friends", num: "朋友", icon: "👭" },
-            { id: 12, word: "Hello", num: "妳好", icon: "👋" },
-            { id: 13, word: "good", num: "好", icon: "👍" },
-            { id: 14, word: "play", num: "玩耍", icon: "⚽" },
-            { id: 15, word: "go", num: "去", icon: "🏃" },
-            { id: 16, word: "school", num: "學校", icon: "🏫" },
-            { id: 17, word: "name", num: "名字", icon: "📛" },
-            { id: 18, word: "meet", num: "遇見", icon: "🤝" },
-            { id: 19, word: "say", num: "說", icon: "💬" },
-            { id: 20, word: "Every day", num: "每一天", icon: "🗓️" }
+            { id: 10, word: "great", anwser: "很棒", icon: "👍" },
+            { id: 11, word: "friends", anwser: "朋友", icon: "👭" },
+            { id: 12, word: "Hello", anwser: "妳好", icon: "👋" },
+            { id: 13, word: "good", anwser: "好的", icon: "👌" },
+            { id: 14, word: "play", anwser: "玩耍", icon: "⚽" },
+            { id: 15, word: "go", anwser: "去", icon: "🏃" },
+            { id: 16, word: "school", anwser: "學校", icon: "🎒" },
+            { id: 17, word: "name", anwser: "名字", icon: "📛" },
+            { id: 18, word: "meet", anwser: "遇見", icon: "🤝" },
+            { id: 19, word: "say", anwser: "說", icon: "💬" },
+            { id: 20, word: "Every day", anwser: "每一天", icon: "🗓️" }
         ];
 
         let selectedBtn = null;
@@ -86,9 +101,25 @@
             const gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
             if (type === 'success') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+               // 第一聲叮 (較低)
+                const osc1 = audioCtx.createOscillator();
+                const gain1 = audioCtx.createGain();
+                osc1.connect(gain1); gain1.connect(audioCtx.destination);
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(1200, audioCtx.currentTime); // 更高的起點
+                gain1.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2); // 聲音漸弱
+                osc1.start(); osc1.stop(audioCtx.currentTime + 0.2);
+
+                // 第二聲叮 (更高更清脆)
+                const osc2 = audioCtx.createOscillator();
+                const gain2 = audioCtx.createGain();
+                osc2.connect(gain2); gain2.connect(audioCtx.destination);
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(1600, audioCtx.currentTime + 0.1); // 0.1秒後發出更高的音
+                gain2.gain.setValueAtTime(0.1, audioCtx.currentTime + 0.1);
+                gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc2.start(audioCtx.currentTime + 0.1); osc2.stop(audioCtx.currentTime + 0.3);
             } else if (type === 'wrong') {
                 osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
                 gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
@@ -113,12 +144,11 @@
 
         function init() {
             const wordCol = document.getElementById('word-col');
-            const numCol = document.getElementById('num-col');
+            const answerCol = document.getElementById('anwser-col');
             
-            // 隨機選 5 個題目
             const selection = [...fullPairsData].sort(() => Math.random() - 0.5).slice(0, 5);
             const words = [...selection].sort(() => Math.random() - 0.5);
-            const nums = [...selection].sort(() => Math.random() - 0.5);
+            const anwsers = [...selection].sort(() => Math.random() - 0.5);
 
             words.forEach(data => {
                 const btn = document.createElement('button');
@@ -134,10 +164,11 @@
                 wordCol.appendChild(btn);
             });
 
-            nums.forEach(data => {
+            anwsers.forEach(data => {
                 const btn = document.createElement('button');
-                btn.className = 'item item-num';
-                btn.innerHTML = `<span class="label-text">${data.num}</span><span class="quantity-icon">${data.icon}</span>`;
+                btn.className = 'item item-anwser';
+                // 這裡修改 HTML 結構，讓 Icon 跟在文字後面
+                btn.innerHTML = `<span class="label-text">${data.anwser}</span><span class="quantity-icon">${data.icon}</span>`;
                 btn.dataset.id = data.id;
                 btn.onclick = () => {
                     if (!selectedBtn || btn.classList.contains('matched')) return;
@@ -154,7 +185,7 @@
                                 playBeep('fanfare');
                                 document.getElementById('main-game').style.backgroundColor = "#e8f8f5";
                             }, 500);
-                            setTimeout(() => speak("Great job! Ten to twenty!"), 1200);
+                            setTimeout(() => speak("Great job! You know the Hello Song words!"), 1200);
                         }
                     } else {
                         playBeep('wrong');
@@ -168,7 +199,7 @@
                         }, 500);
                     }
                 };
-                numCol.appendChild(btn);
+                answerCol.appendChild(btn);
             });
         }
 
@@ -189,7 +220,6 @@
             line.setAttribute('x2', x2); line.setAttribute('y2', y2);
             line.setAttribute('class', 'connection-line');
             svg.appendChild(line);
-            svg.innerHTML = svg.innerHTML; // 強制重繪
         }
 
         init();
