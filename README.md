@@ -36,10 +36,7 @@ https://www.youtube.com/watch?v=GpO8_FMWcHA&list=PLt7Se3SAnZY7l09Oc51Lau2SFsqfDk
 
 https://www.youtube.com/watch?v=eTCcqQxT5Gk&list=PLt7Se3SAnZY7l09Oc51Lau2SFsqfDkEuM&index=7 Counting in 2s
 
-https://www.youtube.com/watch?v=Aq4UAss33qA&list=RDAq4UAss33qA&start_radio=1 1-20
 https://www.youtube.com/watch?v=ieeBFEJwxRw&list=RDieeBFEJwxRw&start_radio=1 Bluey  1-100
-
-
 
 https://www.youtube.com/watch?v=5NJ_H4dEYMI 刷牙
 
