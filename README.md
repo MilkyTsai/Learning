@@ -30,7 +30,7 @@ https://www.youtube.com/watch?v=By2hmo323xM&t=300s
    
    [Match Game](https://milkytsai.github.io/Learning/4_hello_song/match_game.html)
    [QuiZ](https://milkytsai.github.io/Learning/4_hello_song/quiz.html)
-   [Match Game](https://milkytsai.github.io/Learning/find.html)
+   [Match Game](https://milkytsai.github.io/Learning/4_hello_song/find.html)
    
 https://www.youtube.com/watch?v=GpO8_FMWcHA&list=PLt7Se3SAnZY7l09Oc51Lau2SFsqfDkEuM&index=10 Halloween Song for Kids    
 
