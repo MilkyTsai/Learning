@@ -10,9 +10,9 @@ Learning English
 2. Counting from 1-10
    https://www.youtube.com/watch?v=DR-cfDsHCGA
 
-      [Match Game](https://milkytsai.github.io/Learning/2_count_to_10/match_game.html)
-      [Quiz](https://milkytsai.github.io/Learning/2_count_to_10/quiz.html)
-      [Train Game](https://milkytsai.github.io/Learning/2_count_to_10/train_game.html)
+      [Match Game](https://milkytsai.github.io/Learning/2_count_to_10/match_game.html)   
+      [Quiz](https://milkytsai.github.io/Learning/2_count_to_10/quiz.html)   
+      [Train Game](https://milkytsai.github.io/Learning/2_count_to_10/train_game.html)   
    
 
 Numbers 1-20 Lesson for Children
