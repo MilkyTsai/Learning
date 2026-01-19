@@ -29,7 +29,8 @@ https://www.youtube.com/watch?v=By2hmo323xM&t=300s
    https://www.youtube.com/watch?v=gghDRJVxFxU
    
    [Match Game](https://milkytsai.github.io/Learning/4_hello_song/match_game.html)
-   [QuiZ](https://gemini.google.com/share/74a40f1acb7d)
+   [QuiZ](https://milkytsai.github.io/Learning/4_hello_song/quiz.html)
+   [Match Game](https://milkytsai.github.io/Learning/find.html)
    
 https://www.youtube.com/watch?v=GpO8_FMWcHA&list=PLt7Se3SAnZY7l09Oc51Lau2SFsqfDkEuM&index=10 Halloween Song for Kids    
 
