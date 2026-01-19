@@ -21,9 +21,9 @@ https://www.youtube.com/watch?v=By2hmo323xM&t=300s
 3. Counting from 10-20 
    https://www.youtube.com/watch?v=wiGEEJLLKd8
 
-      [Match Game](https://milkytsai.github.io/Learning/3_count_from_11_to_20/match_game.html)
-      [Quiz](https://milkytsai.github.io/Learning/3_count_from_11_to_20/quiz.html)
-      [Dot to Dot](https://milkytsai.github.io/Learning/3_count_from_11_to_20/dot_to_dot.html)
+      [Match Game](https://milkytsai.github.io/Learning/3_count_from_11_to_20/match_game.html)   
+      [Quiz](https://milkytsai.github.io/Learning/3_count_from_11_to_20/quiz.html)   
+      [Dot to Dot](https://milkytsai.github.io/Learning/3_count_from_11_to_20/dot_to_dot.html)   
 
 4. Hello Song
    https://www.youtube.com/watch?v=gghDRJVxFxU
