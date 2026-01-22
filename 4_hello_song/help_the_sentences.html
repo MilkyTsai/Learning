@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help the Sentences! - Hello Song</title>
+    <style>
+        :root {
+            --primary: #FF4757;
+            --secondary: #2ED573;
+            --accent: #FF9F43;
+            --text: #2F3542;
+            --bg: #70A1FF;
+        }
+
+        body {
+            font-family: 'Arial Rounded MT Bold', 'Microsoft JhengHei', sans-serif;
+            background: var(--bg);
+            margin: 0; padding: 0; height: 100vh;
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        /* 啟動遮罩層 */
+        #start-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 2000;
+        }
+
+        .start-btn {
+            background: white; color: var(--primary); border: none;
+            padding: 20px 50px; border-radius: 50px; font-size: 2em;
+            font-weight: bold; cursor: pointer; box-shadow: 0 10px 0px #ff7f8b;
+            transition: 0.2s;
+        }
+        .start-btn:active { transform: translateY(5px); box-shadow: 0 5px 0px #ff7f8b; }
+
+        header {
+            background: white; padding: 10px; text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 10;
+        }
+
+        #quiz-container {
+            flex: 1; overflow-y: auto; padding: 15px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .sentence-card {
+            background: white; width: 100%; max-width: 600px;
+            margin-bottom: 12px; padding: 15px 20px; border-radius: 20px;
+            display: flex; align-items: center; box-shadow: 0 6px 0px rgba(0,0,0,0.1);
+            border: 3px solid transparent; transition: 0.3s;
+        }
+
+        .sentence-card.success { border-color: var(--secondary); background: #E3FFED; }
+        .icon { font-size: 2.2em; margin-right: 15px; }
+        .sentence-text { font-size: 1.3em; color: var(--text); flex: 1; font-weight: bold; }
+
+        .drop-zone {
+            display: inline-block; min-width: 100px;
+            border-bottom: 3px dashed var(--primary);
+            margin: 0 5px; color: #ccc; text-align: center;
+            transition: 0.3s;
+        }
+        .drop-zone.correct { color: var(--secondary); border-bottom: none; }
+        .drop-zone.over { background: rgba(46, 213, 115, 0.2); border-radius: 5px; }
+
+        #word-bank-footer {
+            background: var(--accent); padding: 25px;
+            display: flex; justify-content: center; gap: 15px;
+            box-shadow: 0 -8px 20px rgba(0,0,0,0.2); z-index: 10;
+        }
+
+        .word {
+            background: #FFFFFF; padding: 12px 25px; border-radius: 15px;
+            font-size: 1.4em; font-weight: bold; cursor: grab;
+            color: #FF4757; box-shadow: 0 5px 0px #E67E22;
+            user-select: none; border: 2px solid white;
+            transition: transform 0.2s;
+        }
+        .word.dragging { opacity: 0.4; transform: scale(0.9); }
+        .word:nth-child(2n) { color: #1E90FF; box-shadow: 0 5px 0px #2980B9; }
+
+        #victory-modal {
+            display: none; position: fixed;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; padding: 40px; border-radius: 30px;
+            box-shadow: 0 0 100px rgba(0,0,0,0.5); z-index: 1000; text-align: center;
+            width: 320px;
+        }
+        .replay-btn {
+            background: var(--primary); color: white; border: none;
+            padding: 12px 40px; border-radius: 30px; cursor: pointer; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div id="start-overlay">
+    <h1 style="color: white; font-size: 3em; margin-bottom: 30px;">🌟 Hello Song 🌟</h1>
+    <button class="start-btn" onclick="startGame()">START GAME!</button>
+</div>
+
+<header>
+    <h1 id="main-title" style="margin:0; font-size: 1.6em; color: var(--primary);">🌟 Help the Sentences! 🌟</h1>
+</header>
+
+<div id="quiz-container">
+    <div id="quiz-list" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
+</div>
+
+<div id="word-bank-footer"></div>
+
+<div id="victory-modal">
+    <h1 style="font-size: 4em; margin:0;">🎊</h1>
+    <h2 style="color: var(--secondary);">YOU WIN!</h2>
+    <p>太棒了！挑戰成功！</p>
+    <button class="replay-btn" onclick="location.reload()">再玩一次 🔄</button>
+</div>
+
+<script>
+    const quizData = [
+        { word: "school", icon: "🏫", pre: "I go to ", post: " every day.", full: "I go to school every day.", zh: "我每天去學校。" },
+        { word: "friends", icon: "👭", pre: "I meet my ", post: ".", full: "I meet my friends.", zh: "我遇見我的朋友們。" },
+        { word: "say", icon: "💬", pre: "And we all ", post: ".", full: "And we all say.", zh: "我們大家一起說。" },
+        { word: "hello", icon: "👋", pre: "", post: "! How are you?", full: "Hello, hello! How are you?", zh: "你好，你好！你好嗎？" },
+        { word: "great", icon: "🌟", pre: "I'm good, I'm ", post: "!", full: "I'm good, I'm great!", zh: "我很好，我很棒！" }
+    ];
+
+    let completedCount = 0;
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function startGame() {
+        // 解鎖音訊
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        // 隱藏啟動畫面
+        document.getElementById('start-overlay').style.display = 'none';
+        // 唸出標題
+        speak("Help the Sentences!", "en-US", () => {
+            speak("拯救句子小遊戲！", "zh-TW");
+        });
+    }
+
+    function playMarioSound() {
+        const notes = [659, 659, 659, 523, 659, 783, 392];
+        const times = [0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9];
+        notes.forEach((f, i) => {
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.connect(g); g.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(f, audioCtx.currentTime + times[i]);
+            g.gain.setValueAtTime(0.1, audioCtx.currentTime + times[i]);
+            g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + times[i] + 0.2);
+            osc.start(audioCtx.currentTime + times[i]);
+            osc.stop(audioCtx.currentTime + times[i] + 0.2);
+        });
+    }
+
+    function playCorrect() {
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(523, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1046, audioCtx.currentTime + 0.1);
+        g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+    }
+
+    function playWrong() {
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+        g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+    }
+
+    function speak(text, lang = 'en-US', callback) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = lang;
+        msg.rate = 0.9;
+        if (callback) msg.onend = callback;
+        window.speechSynthesis.speak(msg);
+    }
+
+    // 初始化單字池
+    const wordBank = document.getElementById('word-bank-footer');
+    [...quizData].sort(() => Math.random() - 0.5).forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'word';
+        div.textContent = item.word;
+        div.draggable = true;
+        div.onmouseenter = () => speak(item.word);
+        div.ondragstart = (e) => { 
+            e.dataTransfer.setData('text', item.word); 
+            setTimeout(() => div.classList.add('dragging'), 0); 
+        };
+        div.ondragend = () => div.classList.remove('dragging');
+        wordBank.appendChild(div);
+    });
+
+    // 初始化題目
+    const quizList = document.getElementById('quiz-list');
+    quizData.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'sentence-card';
+        card.innerHTML = `<div class="icon">${item.icon}</div><div class="sentence-text">${item.pre}<span class="drop-zone">______</span>${item.post}</div>`;
+
+        const zone = card.querySelector('.drop-zone');
+        zone.ondragover = (e) => { e.preventDefault(); zone.classList.add('over'); };
+        zone.ondragleave = () => zone.classList.remove('over');
+        zone.ondrop = (e) => {
+            e.preventDefault();
+            zone.classList.remove('over');
+            const data = e.dataTransfer.getData('text');
+            if (data.toLowerCase() === item.word.toLowerCase() && !zone.classList.contains('correct')) {
+                zone.textContent = data;
+                zone.classList.add('correct');
+                card.classList.add('success');
+                playCorrect();
+                
+                const draggedElem = document.querySelector(`.word.dragging`);
+                if(draggedElem) {
+                    draggedElem.style.visibility = 'hidden';
+                    draggedElem.classList.remove('dragging');
+                }
+
+                completedCount++;
+                
+                speak(item.full, 'en-US', () => {
+                    speak(item.full, 'en-US', () => {
+                        speak(item.full, 'en-US', () => {
+                            speak(item.zh, 'zh-TW', () => {
+                                if (completedCount === quizData.length) {
+                                    document.getElementById('victory-modal').style.display = 'block';
+                                    playMarioSound();
+                                }
+                            });
+                        });
+                    });
+                });
+            } else {
+                playWrong();
+            }
+        };
+        quizList.appendChild(card);
+    });
+</script>
+</body>
+</html>
