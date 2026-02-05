@@ -32,6 +32,11 @@ https://www.youtube.com/watch?v=By2hmo323xM&t=300s
       [Quiz](https://milkytsai.github.io/Learning/4_hello_song/quiz.html)   
       [Find](https://milkytsai.github.io/Learning/4_hello_song/find.html)   
       [Help The Sentences](https://milkytsai.github.io/Learning/4_hello_song/help_the_sentences.html)
+
+
+ABC Lullaby   https://www.youtube.com/watch?v=g7BpB98MnpI
+A   https://www.youtube.com/watch?v=Kt0nlWkUBJw
+B   https://www.youtube.com/watch?v=EsVrsJGHsbs
    
 https://www.youtube.com/watch?v=GpO8_FMWcHA&list=PLt7Se3SAnZY7l09Oc51Lau2SFsqfDkEuM&index=10 Halloween Song for Kids    
 
