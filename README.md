@@ -33,6 +33,13 @@ https://www.youtube.com/watch?v=By2hmo323xM&t=300s
       [Find](https://milkytsai.github.io/Learning/4_hello_song/find.html)   
       [Help The Sentences](https://milkytsai.github.io/Learning/4_hello_song/help_the_sentences.html)
 
+5. Happy Birthday Song
+   https://www.thesingingwalrus.com/songs/happy-birthday-song/
+
+   [Quiz](https://milkytsai.github.io/Learning/5_happ_birthday/quiz.html)   
+   
+7.  
+
 
 ABC Lullaby   https://www.youtube.com/watch?v=g7BpB98MnpI
 A   https://www.youtube.com/watch?v=Kt0nlWkUBJw
