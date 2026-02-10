@@ -35,10 +35,10 @@ https://www.youtube.com/watch?v=By2hmo323xM&t=300s
 
 5. Happy Birthday Song
    https://www.thesingingwalrus.com/songs/happy-birthday-song/
-
-   [Quiz](https://milkytsai.github.io/Learning/5_happ_birthday/quiz.html)   
    
-7.  
+   [Quiz](https://milkytsai.github.io/Learning/5_happ_birthday/quiz.html)   
+   [Match Game]
+   [Find]   
 
 
 ABC Lullaby   https://www.youtube.com/watch?v=g7BpB98MnpI
