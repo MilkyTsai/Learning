@@ -36,9 +36,13 @@ https://www.youtube.com/watch?v=By2hmo323xM&t=300s
 5. Happy Birthday Song
    https://www.thesingingwalrus.com/songs/happy-birthday-song/
    
-   [Quiz](https://milkytsai.github.io/Learning/5_happ_birthday/quiz.html)   
-   [Match Game]
-   [Find]   
+   [Quiz](https://milkytsai.github.io/Learning/5_happ_birthday/quiz.html)  
+   [Quiz](https://milkytsai.github.io/Learning/5_happ_birthday/quiz_s.html)    
+   [Match Game](https://milkytsai.github.io/Learning/5_happ_birthday/match_game.html)    
+   [Find](https://milkytsai.github.io/Learning/5_happ_birthday/find.html)       
+
+6. ABC Phonics Song
+   https://www.youtube.com/watch?v=bNg-ZQligKQ
 
 
 ABC Lullaby   https://www.youtube.com/watch?v=g7BpB98MnpI
