@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>Happy Birthday 手電筒探險</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #050a10; font-family: 'Arial Rounded MT Bold', 'Microsoft JhengHei', sans-serif; cursor: none; }
+        
+        #game-area {
+    position: relative; 
+    width: 100vw; 
+    height: 100vh;
+    /* 這裡更換為您提供的圖片連結 */
+    background-image: url('https://img.freepik.com/free-vector/hand-drawn-birthday-background-with-presents_23-2148458541.jpg');
+    
+    /* 關鍵修改：使用 contain 讓整張圖縮放到螢幕內 */
+    background-size: contain; 
+    
+    /* 防止圖片因為縮放而在邊緣重複出現 */
+    background-repeat: no-repeat;
+    
+    /* 讓圖片在螢幕正中間 */
+    background-position: center;
+    
+    /* 如果圖片比例跟螢幕不同，背景補上黑色避免穿幫 */
+    background-color: #050a10; 
+}
+
+        #mask {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.94);
+            mask-image: radial-gradient(circle 120px at var(--x, 50%) var(--y, 50%), transparent 100%, black 100%);
+            -webkit-mask-image: radial-gradient(circle 120px at var(--x, 50%) var(--y, 50%), transparent 100%, black 100%);
+        }
+
+        .word {
+            position: absolute; font-size: 32px; color: rgba(255,255,255,0); 
+            cursor: pointer; transition: color 0.3s, transform 0.3s, text-shadow 0.3s;
+            user-select: none; font-weight: bold; padding: 10px;
+        }
+        
+        .word.peek { color: rgba(255, 255, 255, 0.8); text-shadow: 0 0 15px #fff; transform: scale(1.1); }
+        .word.found { color: #ffeb3b !important; text-shadow: 0 0 25px #ffeb3b; transform: scale(1.4); pointer-events: none; z-index: 10; }
+
+        /* UI 清單：淺色外框與半透明背景 */
+        #ui {
+            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+            color: white; z-index: 100;
+            background: rgba(255, 255, 255, 0.2); 
+            backdrop-filter: blur(15px);
+            padding: 15px 40px; border-radius: 50px; 
+            pointer-events: none;
+            border: 3px solid rgba(255, 255, 255, 0.6); /* 強調淺色外框 */
+            display: flex; align-items: center; gap: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .list-title { font-size: 22px; font-weight: bold; color: #fff; border-right: 2px solid rgba(255,255,255,0.4); padding-right: 15px; }
+        .target { display: inline-block; font-size: 20px; opacity: 0.4; transition: all 0.5s; margin: 0 10px; font-weight: bold; }
+        .target.done { opacity: 1; color: #ffeb3b; transform: translateY(-8px); text-shadow: 0 0 15px #ffeb3b; }
+
+        #flashlight {
+            position: fixed; width: 60px; height: 60px; border: 4px solid #fff;
+            border-radius: 50%; pointer-events: none; z-index: 1000;
+            transform: translate(-50%, -50%); box-shadow: 0 0 40px #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui">
+        <span class="list-title">🎂 生日任務</span>
+        <div id="list">
+            <span class="target" id="t-clap">Clap</span>
+            <span class="target" id="t-reach">Reach</span>
+            <span class="target" id="t-shake">Shake</span>
+            <span class="target" id="t-jump">Jump</span>
+            <span class="target" id="t-stomp">Stomp</span>
+        </div>
+    </div>
+
+    <div id="flashlight"></div>
+
+    <div id="game-area">
+        <div id="mask"></div>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('game-area');
+        const mask = document.getElementById('mask');
+        const flashlight = document.getElementById('flashlight');
+        
+        const wordData = [
+            { en: 'Clap', zh: '拍拍手' },
+            { en: 'Reach', zh: '舉高高' },
+            { en: 'Shake', zh: '搖一搖' },
+            { en: 'Jump', zh: '跳一跳' },
+            { en: 'Stomp', zh: '跺跺腳' }
+        ];
+        
+        const fakes = ['Gift', 'Cake', 'Sing', 'Balloons', 'Party'];
+        let foundCount = 0;
+        const placedRects = []; // 用來存放已放置單字的位置
+
+        window.addEventListener('mousemove', e => {
+            const x = e.clientX, y = e.clientY;
+            mask.style.setProperty('--x', x + 'px');
+            mask.style.setProperty('--y', y + 'px');
+            flashlight.style.left = x + 'px';
+            flashlight.style.top = y + 'px';
+
+            document.querySelectorAll('.word').forEach(w => {
+                const rect = w.getBoundingClientRect();
+                const dx = x - (rect.left + rect.width / 2);
+                const dy = y - (rect.top + rect.height / 2);
+                if (Math.sqrt(dx*dx + dy*dy) < 120 && !w.classList.contains('found')) {
+                    w.classList.add('peek');
+                } else {
+                    w.classList.remove('peek');
+                }
+            });
+        });
+
+        function speakWordChain(en, zh) {
+            window.speechSynthesis.cancel();
+            for (let i = 0; i < 3; i++) {
+                const msgEn = new SpeechSynthesisUtterance(en);
+                msgEn.lang = 'en-US';
+                msgEn.rate = 0.8;
+                setTimeout(() => window.speechSynthesis.speak(msgEn), i * 1100);
+            }
+            const msgZh = new SpeechSynthesisUtterance(zh);
+            msgZh.lang = 'zh-TW';
+            msgZh.rate = 0.9;
+            setTimeout(() => window.speechSynthesis.speak(msgZh), 3 * 1100);
+        }
+
+        // 防止重疊的放置函式
+        function placeWithoutOverlap(el) {
+            let maxAttempts = 100;
+            let overlaps = true;
+            let x, y;
+
+            while (overlaps && maxAttempts > 0) {
+                x = Math.random() * 80 + 5; // 5vw ~ 85vw
+                y = Math.random() * 60 + 15; // 15vh ~ 75vh
+                el.style.left = x + 'vw';
+                el.style.top = y + 'vh';
+                
+                // 這裡簡單預估單字寬高進行碰撞檢查
+                const currentRect = { x: x, y: y, w: 15, h: 10 }; 
+                overlaps = placedRects.some(r => {
+                    return !(currentRect.x + currentRect.w < r.x || 
+                             currentRect.x > r.x + r.w || 
+                             currentRect.y + currentRect.h < r.y || 
+                             currentRect.y > r.y + r.h);
+                });
+                maxAttempts--;
+            }
+            placedRects.push({ x: x, y: y, w: 15, h: 10 });
+        }
+
+        function createWords() {
+            wordData.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'word';
+                el.textContent = item.en;
+                placeWithoutOverlap(el);
+                el.onclick = () => {
+                    el.classList.add('found');
+                    const targetEl = document.getElementById('t-' + item.en.toLowerCase());
+                    if(targetEl) targetEl.classList.add('done');
+                    speakWordChain(item.en, item.zh);
+                    foundCount++;
+                    if (foundCount === wordData.length) {
+                        setTimeout(() => {
+                            const finish = new SpeechSynthesisUtterance("Happy Birthday! You are amazing!");
+                            window.speechSynthesis.speak(finish);
+                        }, 5000);
+                    }
+                };
+                gameArea.appendChild(el);
+            });
+
+            fakes.forEach(text => {
+                const el = document.createElement('div');
+                el.className = 'word fake';
+                el.textContent = text;
+                placeWithoutOverlap(el);
+                gameArea.appendChild(el);
+            });
+        }
+
+        createWords();
+    </script>
+</body>
+</html>

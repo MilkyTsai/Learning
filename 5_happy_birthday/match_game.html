@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Match Game</title>
+    <style>
+        :root {
+            --pink: #ff85a2;
+            --blue: #a2d2ff;
+            --yellow: #ffeead;
+            --correct: #9de47c;
+        }
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--yellow);
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; margin: 0; overflow: hidden;
+        }
+        #game-container {
+            background: white; padding: 25px; border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center; width: 90%; max-width: 700px;
+            border: 6px solid var(--pink);
+        }
+        .instruction { font-size: 20px; color: #555; margin-bottom: 20px; }
+
+        .game-board {
+            display: flex; justify-content: space-between; gap: 20px;
+        }
+
+        .column {
+            flex: 1; display: flex; flex-direction: column; gap: 15px;
+        }
+
+        /* 左側目標區樣式 */
+        .pair-row {
+            display: flex; align-items: center; background: #fdf2f4;
+            border-radius: 15px; padding: 10px; border: 2px solid #ffdae3;
+        }
+        .label-zh { width: 80px; font-size: 20px; font-weight: bold; color: #d63384; }
+        .drop-zone {
+            flex-grow: 1; height: 50px; background: white;
+            border: 3px dashed #ccc; border-radius: 10px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 18px; color: #999; transition: all 0.3s;
+        }
+        .drop-zone.hover { border-color: var(--pink); background: #fff0f3; transform: scale(1.02); }
+        .drop-zone.matched { 
+            background: var(--correct); border: none; color: white; 
+            font-weight: bold; font-size: 22px; 
+        }
+
+        /* 右側英文單字池樣式 */
+        .word-pool {
+            display: flex; flex-direction: column; gap: 15px;
+        }
+        .draggable-word {
+            padding: 12px; border-radius: 12px; color: white;
+            font-size: 22px; font-weight: bold; cursor: grab;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+            transition: transform 0.2s, opacity 0.2s;
+            text-align: center;
+            user-select: none;
+        }
+        .draggable-word:active { cursor: grabbing; transform: scale(1.1); }
+        .draggable-word.dragging { opacity: 0.5; }
+
+        /* 五種鮮豔顏色 */
+        .c1 { background-color: #ff6b6b; }
+        .c2 { background-color: #4dadf7; }
+        .c3 { background-color: #51cf66; }
+        .c4 { background-color: #fcc419; }
+        .c5 { background-color: #ae3ec9; }
+
+        #victory-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.96);
+            display: none; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <h1 style="color:var(--pink)">Help the Sentences!</h1>
+    <div class="instruction">把右邊的英文拖到左邊正確的位置吧！</div>
+    
+    <div class="game-board">
+        <div class="column">
+            <div class="pair-row"><span class="label-zh">生日</span><div class="drop-zone" id="dz-Birthday" ondrop="drop(event)" ondragover="allowDrop(event)">拖到這</div></div>
+            <div class="pair-row"><span class="label-zh">拍手</span><div class="drop-zone" id="dz-Clap" ondrop="drop(event)" ondragover="allowDrop(event)">拖到這</div></div>
+            <div class="pair-row"><span class="label-zh">跳躍</span><div class="drop-zone" id="dz-Jump" ondrop="drop(event)" ondragover="allowDrop(event)">拖到這</div></div>
+            <div class="pair-row"><span class="label-zh">跺腳</span><div class="drop-zone" id="dz-Stomp" ondrop="drop(event)" ondragover="allowDrop(event)">拖到這</div></div>
+            <div class="pair-row"><span class="label-zh">雙手</span><div class="drop-zone" id="dz-Hands" ondrop="drop(event)" ondragover="allowDrop(event)">拖到這</div></div>
+        </div>
+
+        <div class="column word-pool" id="pool">
+            </div>
+    </div>
+</div>
+
+<div id="victory-modal">
+    <h1 style="font-size: 50px; color: var(--pink);">You're Amazing!</h1>
+    <h2 style="font-size: 30px;">你真棒！</h2>
+    <div style="font-size: 100px;">🎉🎀🎂</div>
+    <button onclick="location.reload()" style="margin-top:20px; padding:15px 40px; border-radius:30px; border:none; background:var(--pink); color:white; font-size:24px; cursor:pointer;">再玩一次</button>
+</div>
+
+<audio id="sound-ding" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
+<audio id="sound-error" src="https://assets.mixkit.co/active_storage/sfx/1001/1001-preview.mp3"></audio>
+<audio id="sound-mario" src="https://dl.vgmdownloads.com/soundtracks/super-mario-bros/shvcrevofp/18%20-%20Course%20Clear.mp3"></audio>
+
+<script>
+const data = [
+    { en: "Birthday", zh: "生日", color: "c1" },
+    { en: "Clap", zh: "拍手", color: "c2" },
+    { en: "Jump", zh: "跳躍", color: "c3" },
+    { en: "Stomp", zh: "跺腳", color: "c4" },
+    { en: "Hands", zh: "雙手", color: "c5" }
+];
+
+let matched = 0;
+const synth = window.speechSynthesis;
+
+function speak(text, lang = 'en-US', callback) {
+    synth.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = lang;
+    utter.rate = 0.9;
+    if (callback) utter.onend = callback;
+    synth.speak(utter);
+}
+
+function allowDrop(e) { e.preventDefault(); }
+
+// 初始化單字池
+function init() {
+    speak("Help the Sentences! 幫幫這些句子！");
+    const pool = document.getElementById('pool');
+    const shuffled = [...data].sort(() => Math.random() - 0.5);
+    
+    shuffled.forEach(item => {
+        const div = document.createElement('div');
+        div.className = `draggable-word ${item.color}`;
+        div.innerText = item.en;
+        div.id = `drag-${item.en}`;
+        div.draggable = true;
+        
+        // 拖曳開始
+        div.ondragstart = (e) => {
+            e.dataTransfer.setData("text", item.en);
+            div.classList.add('dragging');
+            speak(item.en);
+        };
+        div.ondragend = () => div.classList.remove('dragging');
+        div.onmouseover = () => speak(item.en);
+        
+        pool.appendChild(div);
+    });
+}
+
+function drop(e) {
+    e.preventDefault();
+    const draggedWord = e.dataTransfer.setData ? e.dataTransfer.getData("text") : null;
+    if(!draggedWord) return;
+
+    const targetId = e.target.id.replace('dz-', '');
+    const dropZone = e.target;
+
+    if (draggedWord === targetId) {
+        // 答對邏輯
+        matched++;
+        document.getElementById('sound-ding').play();
+        dropZone.innerText = draggedWord;
+        dropZone.className = "drop-zone matched";
+        document.getElementById(`drag-${draggedWord}`).style.display = "none";
+        
+        // 念三次英文一次中文
+        speak(draggedWord, 'en-US', () => {
+            speak(draggedWord, 'en-US', () => {
+                speak(draggedWord, 'en-US', () => {
+                    const zhText = data.find(i => i.en === draggedWord).zh;
+                    speak(zhText, 'zh-TW', () => {
+                        if (matched === data.length) showVictory();
+                    });
+                });
+            });
+        });
+    } else {
+        // 答錯邏輯
+        const s = document.getElementById('sound-error');
+        s.currentTime = 0; s.play();
+        setTimeout(() => { s.pause(); s.currentTime = 0; }, 600);
+        speak("Try again");
+    }
+}
+
+function showVictory() {
+    document.getElementById('victory-modal').style.display = 'flex';
+    speak("You are amazing!", 'en-US', () => {
+        speak("你真棒！", 'zh-TW', () => {
+            document.getElementById('sound-mario').play();
+        });
+    });
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
