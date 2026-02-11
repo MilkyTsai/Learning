@@ -37,7 +37,7 @@ https://www.youtube.com/watch?v=By2hmo323xM&t=300s
    https://www.thesingingwalrus.com/songs/happy-birthday-song/
    
    [Quiz](https://milkytsai.github.io/Learning/5_happy_birthday/quiz.html)  
-   [Quiz](https://milkytsai.github.io/Learning/5_happy_birthday/quiz_s.html) 
+   [Simple Quiz](https://milkytsai.github.io/Learning/5_happy_birthday/quiz_s.html) 
    [Match Game](https://milkytsai.github.io/Learning/5_happy_birthday/match_game.html)    
    [Find](https://milkytsai.github.io/Learning/5_happy_birthday/find.html)       
 
