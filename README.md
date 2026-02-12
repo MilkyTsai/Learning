@@ -46,13 +46,16 @@ https://www.youtube.com/watch?v=By2hmo323xM&t=300s
 
    
 https://www.thesingingwalrus.com/songs/numbers-1-20-lesson/
-https://www.thesingingwalrus.com/songs/friends-song/
 https://www.thesingingwalrus.com/songs/summer-song/
 
 
 ABC Lullaby   https://www.youtube.com/watch?v=g7BpB98MnpI
 A   https://www.youtube.com/watch?v=Kt0nlWkUBJw
 B   https://www.youtube.com/watch?v=EsVrsJGHsbs
+
+
+https://www.thesingingwalrus.com/songs/friends-song/
+
    
 https://www.youtube.com/watch?v=GpO8_FMWcHA&list=PLt7Se3SAnZY7l09Oc51Lau2SFsqfDkEuM&index=10 Halloween Song for Kids    
 
