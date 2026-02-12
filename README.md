@@ -37,12 +37,17 @@ https://www.youtube.com/watch?v=By2hmo323xM&t=300s
    https://www.thesingingwalrus.com/songs/happy-birthday-song/
    
    [Quiz](https://milkytsai.github.io/Learning/5_happy_birthday/quiz.html)  
-   [Simple Quiz](https://milkytsai.github.io/Learning/5_happy_birthday/quiz_s.html) 
-   [Match Game](https://milkytsai.github.io/Learning/5_happy_birthday/match_game.html)    
-   [Find](https://milkytsai.github.io/Learning/5_happy_birthday/find.html)       
+   [Simple Quiz](https://milkytsai.github.io/Learning/5_happy_birthday/quiz_s.html)  
+   [Match Game](https://milkytsai.github.io/Learning/5_happy_birthday/match_game.html)  
+   [Find](https://milkytsai.github.io/Learning/5_happy_birthday/find.html)    
 
 6. ABC Phonics Song
    https://www.youtube.com/watch?v=bNg-ZQligKQ
+
+   
+https://www.thesingingwalrus.com/songs/numbers-1-20-lesson/
+https://www.thesingingwalrus.com/songs/friends-song/
+https://www.thesingingwalrus.com/songs/summer-song/
 
 
 ABC Lullaby   https://www.youtube.com/watch?v=g7BpB98MnpI
